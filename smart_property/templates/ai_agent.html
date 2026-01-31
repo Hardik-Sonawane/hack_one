@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>AI Property Analyst</title>
+
+<style>
+body {
+    background:#0f2027;
+    color:white;
+    font-family:Arial;
+}
+
+.chat {
+    max-width:700px;
+    margin:auto;
+    margin-top:40px;
+}
+
+.box {
+    height:400px;
+    overflow-y:auto;
+    padding:15px;
+    background:rgba(255,255,255,0.1);
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+input {
+    width:80%;
+    padding:10px;
+    border-radius:6px;
+    border:none;
+}
+
+button {
+    padding:10px 15px;
+    background:#00c6ff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.user { color:#00f2fe; margin:5px 0; }
+.bot { color:#00ff99; margin:5px 0; }
+</style>
+</head>
+
+<body>
+
+<h2 align="center">🤖 AI Property Data Analyst</h2>
+<p align="center">Ask anything about properties in database</p>
+
+<div class="chat">
+    <div class="box" id="chat"></div>
+
+    <input id="msg" placeholder="Ask: cheapest property in Andheri">
+    <button onclick="send()">Send</button>
+</div>
+
+<script>
+function send(){
+    let m = document.getElementById("msg").value;
+    let chat = document.getElementById("chat");
+
+    if(m.trim() === "") return;
+
+    chat.innerHTML += `<div class='user'>You: ${m}</div>`;
+    document.getElementById("msg").value = "";
+
+    fetch("/ai-agent/api/", {
+        method:"POST",
+        headers:{
+            'Content-Type':'application/x-www-form-urlencoded',
+            'X-CSRFToken':'{{ csrf_token }}'
+        },
+        body:new URLSearchParams({message:m})
+    })
+    .then(r => r.json())
+    .then(d => {
+        chat.innerHTML += `<div class='bot'>AI: ${d.reply}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+    });
+}
+</script>
+
+</body>
+</html>

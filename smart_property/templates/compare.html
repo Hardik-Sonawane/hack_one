@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Compare Properties</title>
+    <style>
+        body {
+            font-family: Inter, sans-serif;
+            background: #0f2027;
+            color: white;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        th {
+            background: rgba(0,0,0,0.3);
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .back-btn {
+            margin-top: 30px;
+            display: inline-block;
+            text-decoration: none;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Property Comparison</h1>
+
+{% if error %}
+<p style="text-align:center;">{{ error }}</p>
+{% else %}
+<table>
+    <tr>
+        <th>Feature</th>
+        {% for p in properties %}
+        <th>{{ p.title }}</th>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Price</td>
+        {% for p in properties %}
+        <td>₹ {{ p.price }}</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Area</td>
+        {% for p in properties %}
+        <td>{{ p.area }} sqft</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Bedrooms</td>
+        {% for p in properties %}
+        <td>{{ p.bedroom_num }}</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Bathrooms</td>
+        {% for p in properties %}
+        <td>{{ p.bathroom_num }}</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Furnished</td>
+        {% for p in properties %}
+        <td>{{ p.furnished }}</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Property Type</td>
+        {% for p in properties %}
+        <td>{{ p.property_type }}</td>
+        {% endfor %}
+    </tr>
+
+    <tr>
+        <td>Locality</td>
+        {% for p in properties %}
+        <td>{{ p.locality }}</td>
+        {% endfor %}
+    </tr>
+</table>
+{% endif %}
+
+<a href="/" class="back-btn">← Back to Search</a>
+
+</body>
+</html>

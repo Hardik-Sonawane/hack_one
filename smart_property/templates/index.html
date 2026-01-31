@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Property Recommender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .hero {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glass-card {
+            width: 650px;
+            padding: 40px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: white;
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+        }
+
+        .glass-card h1 {
+            font-size: 30px;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .glass-card p {
+            opacity: 0.8;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .search-form .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .search-form input,
+        .search-form select {
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: rgba(255,255,255,0.9);
+        }
+
+        .search-form input::placeholder {
+            color: #555;
+        }
+
+        .persona-box {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .persona-box label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .search-form button {
+            margin-top: 25px;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: white;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .search-form button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            font-size: 12px;
+            opacity: 0.6;
+        }
+
+        @media (max-width: 700px) {
+            .glass-card {
+                width: 90%;
+            }
+
+            .search-form .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <div class="glass-card">
+        <h1> Smart Property Recommendation System</h1>
+        <p>Context-aware AI-powered property suggestions for Mumbai</p>
+
+        <form method="POST" action="/recommend/" class="search-form">
+            {% csrf_token %}
+
+            <div class="grid">
+                <input name="price" placeholder="Budget (₹)" required>
+                <input name="area" placeholder="Area (sqft)" required>
+                <input name="bedroom_num" placeholder="Bedrooms" required>
+                <input name="bathroom_num" placeholder="Bathrooms" required>
+            </div>
+
+            <!-- USER PERSONA -->
+            <div class="persona-box">
+                <label>Who are you?</label>
+                <select name="persona" required>
+                    <option value="student"> Student (Low budget)</option>
+                    <option value="professional"> Working Professional (Balanced)</option>
+                    <option value="family"> Family (More bedrooms)</option>
+                    <option value="investor"> Investor (Max ROI)</option>
+                </select>
+            </div>
+
+            <button type="submit">Get AI Recommendations </button>
+        </form>
+        
+        <a href="/ai-agent/" style="
+            display:block;
+            margin-top:20px;
+            text-align:center;
+            padding:12px;
+            background:#00c6ff;
+            color:white;
+            border-radius:10px;
+            text-decoration:none;
+            font-weight:bold;
+            ">
+             Talk to AI Property Assistant
+            </a>
+            
+            <div class="footer-text">
+                Built with Django & Context-Aware AI • 70,000+ Mumbai Properties
+            </div>
+    </div>
+</div>
+
+</body>
+</html>
