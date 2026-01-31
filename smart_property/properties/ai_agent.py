@@ -3,7 +3,7 @@ import json
 from .models import Property
 from django.db.models import Avg
 
-API_KEY = "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"
+API_KEY = "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"
 MODEL = "google/gemini-2.5-pro"
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
