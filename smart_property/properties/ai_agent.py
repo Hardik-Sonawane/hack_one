@@ -1,21 +1,30 @@
+import os
 import requests
-import json
 from .models import Property
 from django.db.models import Avg
 
-API_KEY = "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"
+# -----------------------------------------
+# OPENROUTER CONFIG (Railway-safe)
+# -----------------------------------------
+API_KEY = os.getenv("OPENROUTER_API_KEY")
 MODEL = "google/gemini-2.5-pro"
 URL = "https://openrouter.ai/api/v1/chat/completions"
 
-def ask_ai_agent(query):
-    query_lower = query.lower()
 
+def ask_ai_agent(query):
+    if not API_KEY:
+        return "AI service is not configured. API key missing."
+
+    query_lower = query.lower()
     context = ""
 
-    # REAL DATABASE LOGIC
+    # -----------------------------------------
+    # DATABASE-AWARE CONTEXT
+    # -----------------------------------------
     if "cheapest" in query_lower:
         prop = Property.objects.order_by("price").first()
-        context = f"""
+        if prop:
+            context = f"""
 Cheapest property:
 Title: {prop.title}
 Price: {prop.price}
@@ -23,21 +32,29 @@ Locality: {prop.locality}
 Area: {prop.area} sqft
 Bedrooms: {prop.bedroom_num}
 """
+        else:
+            context = "No properties available in the database."
 
     elif "average price" in query_lower:
         avg_price = Property.objects.aggregate(avg=Avg("price"))["avg"]
-        context = f"Average price of all properties is ₹{int(avg_price)}"
+        if avg_price:
+            context = f"Average price of all properties is ₹{int(avg_price)}"
+        else:
+            context = "No price data available."
 
     else:
         total = Property.objects.count()
         context = f"There are {total} properties in the database."
 
+    # -----------------------------------------
+    # OPENROUTER PAYLOAD
+    # -----------------------------------------
     payload = {
         "model": MODEL,
         "messages": [
             {
                 "role": "system",
-                "content": "You are an AI property assistant. Use the given database info to answer."
+                "content": "You are an AI property assistant. Answer using the provided database information only."
             },
             {
                 "role": "user",
@@ -53,10 +70,15 @@ Bedrooms: {prop.bedroom_num}
         "Content-Type": "application/json"
     }
 
-    response = requests.post(URL, headers=headers, json=payload)
-    data = response.json()
+    try:
+        response = requests.post(URL, headers=headers, json=payload, timeout=30)
+        response.raise_for_status()
+        data = response.json()
 
-    if "choices" in data:
-        return data["choices"][0]["message"]["content"]
-    else:
-        return str(data)
+        if "choices" in data and len(data["choices"]) > 0:
+            return data["choices"][0]["message"]["content"]
+
+        return "AI could not generate a response."
+
+    except requests.exceptions.RequestException as e:
+        return f"AI request failed: {str(e)}"
