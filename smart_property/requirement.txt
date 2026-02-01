@@ -1,8 +1,0 @@
-Django==5.1.1
-numpy
-pandas
-scikit-learn
-requests
-gunicorn
-whitenoise
-dj-database-url

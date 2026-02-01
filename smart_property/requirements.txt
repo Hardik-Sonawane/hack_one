@@ -514,3 +514,11 @@ zipfile36==0.1.3
 zipp @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zipp_1707493775475/work
 zope.interface @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/zope.interface_1699497164709/work
 zstandard @ file:///C:/b/abs_e46tf0_91g/croot/zstandard_1714678303615/work
+Django==5.1.1
+numpy
+pandas
+scikit-learn
+requests
+gunicorn
+whitenoise
+dj-database-url
