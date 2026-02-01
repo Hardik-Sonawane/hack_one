@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.db.models import Count
 import numpy as np
@@ -9,35 +9,42 @@ from .clustering import cluster_properties
 from .ai_agent import ask_ai_agent
 
 
+# ---------------- HOME ----------------
 def index(request):
     return render(request, "index.html")
 
 
+# ---------------- RECOMMEND ----------------
 def get_recommendations(request):
+    # 🚫 Never allow GET on /recommend/
+    if request.method == "GET":
+        return redirect("/")
+
     props = Property.objects.all()
 
     if not props.exists():
         return render(request, "recommend.html", {
-            "error": "Database empty"
+            "error": "No properties available in database."
         })
 
-    # Cold start
-    if request.method != "POST" or not request.POST.get("price"):
-        results = cold_start(props)
-        return render(request, "recommend.html", {"results": results})
+    # ---------------- USER INPUT ----------------
+    try:
+        user_input = {
+            "price": float(request.POST.get("price")),
+            "area": float(request.POST.get("area")),
+            "bedroom_num": int(request.POST.get("bedroom_num")),
+            "bathroom_num": int(request.POST.get("bathroom_num")),
+            "persona": request.POST.get("persona", "student"),
+        }
+    except (TypeError, ValueError):
+        return render(request, "recommend.html", {
+            "error": "Invalid input values."
+        })
 
-    # User input
-    user_input = {
-        "price": float(request.POST["price"]),
-        "area": float(request.POST["area"]),
-        "bedroom_num": int(request.POST["bedroom_num"]),
-        "bathroom_num": int(request.POST["bathroom_num"]),
-        "persona": request.POST.get("persona", "student")
-    }
-
+    # ---------------- RECOMMENDATION ENGINE ----------------
     ranked = recommend(user_input, list(props))
 
-    # -------- FILTERS --------
+    # ---------------- OPTIONAL FILTERS ----------------
     min_price = request.POST.get("min_price")
     max_price = request.POST.get("max_price")
     furnished = request.POST.get("furnished")
@@ -63,7 +70,7 @@ def get_recommendations(request):
             "error": "No properties matched your criteria."
         })
 
-    # -------- SORTING --------
+    # ---------------- SORTING ----------------
     sort_by = request.POST.get("sort_by")
     if sort_by == "price_low":
         filtered.sort(key=lambda x: x[0].price)
@@ -72,19 +79,21 @@ def get_recommendations(request):
     elif sort_by == "bedrooms":
         filtered.sort(key=lambda x: x[0].bedroom_num, reverse=True)
 
-    # -------- BEST CHOICE --------
+    # ---------------- BEST PICKS ----------------
     cheapest = min(filtered, key=lambda x: x[0].price)[0]
     largest = max(filtered, key=lambda x: x[0].area)[0]
     best_match = max(filtered, key=lambda x: x[1])[0]
 
-    # -------- XAI EXPLANATION --------
+    # ---------------- XAI EXPLANATIONS ----------------
     explanations = {}
 
     locality_prices = {}
     for p in props:
         locality_prices.setdefault(p.locality, []).append(p.price)
 
-    locality_avg = {loc: np.mean(prices) for loc, prices in locality_prices.items()}
+    locality_avg = {
+        loc: np.mean(prices) for loc, prices in locality_prices.items()
+    }
 
     for p, score in filtered:
         reasons = []
@@ -105,13 +114,13 @@ def get_recommendations(request):
 
         explanations[p.id] = "Recommended because it " + " and ".join(reasons) + "."
 
-    # -------- CLUSTERING --------
+    # ---------------- CLUSTERING ----------------
     cluster_map = cluster_properties([p for p, _ in filtered])
 
     cluster_names = {
         0: "Budget Home",
         1: "Premium Home",
-        2: "Luxury Home"
+        2: "Luxury Home",
     }
 
     cluster_labels = {
@@ -125,10 +134,11 @@ def get_recommendations(request):
         "largest_id": largest.id,
         "best_match_id": best_match.id,
         "explanations": explanations,
-        "clusters": cluster_labels
+        "clusters": cluster_labels,
     })
 
 
+# ---------------- COMPARE ----------------
 def compare_properties(request):
     ids = request.POST.getlist("compare_ids")
 
@@ -141,6 +151,7 @@ def compare_properties(request):
     return render(request, "compare.html", {"properties": props})
 
 
+# ---------------- HEATMAP ----------------
 def demand_heatmap(request):
     data = (
         Property.objects
@@ -163,6 +174,7 @@ def demand_heatmap(request):
     return render(request, "heatmap.html", {"heatmap": heatmap})
 
 
+# ---------------- AI AGENT ----------------
 def ai_agent_page(request):
     return render(request, "ai_agent.html")
 
