@@ -20,7 +20,19 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-secret-key")
 
 DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "hackone-production.up.railway.app",
+    "localhost",
+    "127.0.0.1",
+]
+
+
+# ✅ REQUIRED FOR RAILWAY + HTTPS
+CSRF_TRUSTED_ORIGINS = [
+    "https://hackone-production.up.railway.app",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 
 # --------------------------------------------------
@@ -45,7 +57,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",  # DO NOT REMOVE
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -85,7 +97,9 @@ WSGI_APPLICATION = "smart_property.wsgi.application"
 # --------------------------------------------------
 DATABASES = {
     "default": dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=600,
+        ssl_require=True,
     )
 }
 
@@ -113,9 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # INTERNATIONALIZATION
 # --------------------------------------------------
 LANGUAGE_CODE = "en-us"
-
 TIME_ZONE = "UTC"
-
 USE_I18N = True
 USE_TZ = True
 
